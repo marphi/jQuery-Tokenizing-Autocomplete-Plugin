@@ -351,9 +351,12 @@ $.TokenList = function (input, settings) {
 
       
       $.data(this_token.get(0), "tokeninput", data);
-      
+
+      var index = tokenStorage.length;
       tokenStorage.push(data);
-      $.data(this_token.get(0), "tokenindex", data.length);
+      
+      $.data(this_token.get(0), "tokenindex", index);
+      $(input).trigger('addToken', [data, index]);
 
       return this_token;
     }
@@ -362,6 +365,7 @@ $.TokenList = function (input, settings) {
     function add_token (item) {
         var li_data = $.data(item.get(0), "tokeninput");
         var this_token = insert_token(li_data);
+        
 
         // Clear input box and make sure it keeps focus
         input_box
@@ -430,11 +434,13 @@ $.TokenList = function (input, settings) {
         
         var token_index = $.data(token.get(0), "tokenindex");
 
+        $(input).trigger('deleteToken', [token_data, token_index]);
 
         // Delete the token
         token.remove();
         selected_token = null
         
+
         delete tokenStorage[token_index];
 
         // Show the input box and give it focus again
@@ -494,8 +500,6 @@ $.TokenList = function (input, settings) {
                 if (results.hasOwnProperty(i)) {
                     var this_li = $("<li>"+highlight_term(settings.formatName(results[i]), query)+"</li>")
                                       .appendTo(dropdown_ul);
-
-                    console.log(highlight_term(settings.formatName(results[i]), query));
                     if(i%2) {
                         this_li.addClass(settings.classes.dropdownItem);
                     } else {
