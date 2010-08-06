@@ -2,13 +2,17 @@
 <head>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js"></script>
 
-    <script type="text/javascript" src="jquery.tokeninput.js"></script>
+    <script type="text/javascript" src="../src/jquery.tokeninput.js"></script>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 
-    <link rel="stylesheet" href="styles/token-input.css" type="text/css" />
-    <link rel="stylesheet" href="styles/token-input-facebook.css" type="text/css" />
+    <link rel="stylesheet" href="../styles/token-input.css" type="text/css" />
+    <link rel="stylesheet" href="../styles/token-input-facebook.css" type="text/css" />
 
 
     <script type="text/javascript">
+    var geocoder = new google.maps.Geocoder();
+
+     
     $(document).ready(function() {
         $("#tokenize").tokenInput("http://loopj.com/tokeninput/tvshows.php", {
             hintText: "Type in the names of your favorite TV shows",
@@ -30,6 +34,30 @@
                 inputToken: "token-input-input-token-facebook"
             }
         });
+
+
+        var geocoderComplete = function(term, callback) {
+            var geocoderRequest = {
+				address: term
+            };
+
+            geocoder.geocode(geocoderRequest, function(geocoderResults, status) {
+                var results = [];
+                
+				if (status == google.maps.GeocoderStatus.OK) {
+					$.each(geocoderResults, function(i, val) {
+						results.push({id: val.formatted_address, name: val.formatted_address});					
+					});
+				}
+				callback(results);
+            });
+        };
+
+        $("#tokenize3").tokenInput(geocoderComplete, {
+            hintText: "Type your address",
+            noResultsText: "No results",
+            searchingText: "Searching..."
+        });
     });
     </script>
 </head>
@@ -45,6 +73,11 @@
     <div>
         <h2>Facebook style</h2>
         <input type="text" id="tokenize2" name="blah2" />
+    </div>
+    
+    <div>
+        <h2>Address</h2>
+        <input type="text" id="tokenize3" name="blah3" />
     </div>
 </body>
 </html>
