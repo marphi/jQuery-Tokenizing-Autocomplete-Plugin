@@ -24,14 +24,14 @@ $.fn.tokenInput = function (urlOrFunction, options) {
         contentType: "json",
         queryParam: "q",
         onResult: null,
-		delimiter: "|",
-		delimiterKeyCode: 220,
+		delimiter: ",",
+		delimiterKeyCode: 188,
 		prePopulate: [],
 		formatName: $.TokenList.FormatName,
 		parseValue: $.TokenList.ParseValue,
 		showNoResultInfo: true,
 		dropdownShowDuration: 100,
-		dropDownHideDuraiton: null,
+		dropDownHideDuraiton: null
     }, options);
 
     settings.classes = $.extend({
