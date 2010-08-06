@@ -23,7 +23,9 @@ $.fn.tokenInput = function (urlOrFunction, options) {
         method: "GET",
         contentType: "json",
         queryParam: "q",
-        onResult: null
+        onResult: null,
+		delimiter: "|",
+		delimiterKeyCode: 220
     }, options);
 
     settings.classes = $.extend({
@@ -158,7 +160,6 @@ $.TokenList = function (input, settings) {
 
                 case KEY.TAB:
                 case KEY.RETURN:
-                case KEY.COMMA:
                   if(selected_dropdown_item) {
                     add_token($(selected_dropdown_item));
                     return false;
@@ -170,9 +171,16 @@ $.TokenList = function (input, settings) {
                   return true;
 
                 default:
-                    if(is_printable_character(event.keyCode)) {
-                      // set a timeout just long enough to let this function finish.
-                      setTimeout(function(){do_search(false);}, 5);
+	            	if (event.keyCode == settings.delimiterKeyCode) {
+	            		if (selected_dropdown_item) {
+							add_token($(selected_dropdown_item));
+	                	}
+					} else {
+						if(is_printable_character(event.keyCode)) {
+                    	
+	                        // set a timeout just long enough to let this function finish.
+	                        setTimeout(function(){do_search(false);}, 5);
+    					}
                     }
                     break;
             }
@@ -277,7 +285,7 @@ $.TokenList = function (input, settings) {
                 hide_dropdown();
 
                 // Save this token id
-                var id_string = li_data[i].id + ","
+                var id_string = li_data[i].id + settings.delimiter;
                 hidden_input.val(hidden_input.val() + id_string);
             }
         }
@@ -343,7 +351,7 @@ $.TokenList = function (input, settings) {
         hide_dropdown();
 
         // Save this token id
-        var id_string = li_data.id + ","
+        var id_string = li_data.id + settings.delimiter;
         hidden_input.val(hidden_input.val() + id_string);
         
         token_count++;
