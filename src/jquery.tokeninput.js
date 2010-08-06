@@ -25,7 +25,10 @@ $.fn.tokenInput = function (urlOrFunction, options) {
         queryParam: "q",
         onResult: null,
 		delimiter: "|",
-		delimiterKeyCode: 220
+		delimiterKeyCode: 220,
+		prePopulate: [],
+		formatName: $.TokenList.FormatName,
+		parseValue: $.TokenList.ParseValue
     }, options);
 
     settings.classes = $.extend({
@@ -82,6 +85,12 @@ $.TokenList = function (input, settings) {
 
     // Keep track of the timeout
     var timeout;
+    
+    var tokenStorage = settings.prePopulate;
+    
+    if (!$.isArray(tokenStorage)) {
+    	tokenStorage = [];
+    }
 
     // Create a new text input an attach keyup events
     var input_box = $("<input type=\"text\">")
@@ -237,6 +246,7 @@ $.TokenList = function (input, settings) {
             }
         });
 
+    
 
     // The list to store the dropdown items in
     var dropdown = $("<div>")
@@ -255,11 +265,17 @@ $.TokenList = function (input, settings) {
     //
     // Functions
     //
+    
+    
+    // parse storage with token and put in hidden input
+    function parseStorage() {
+    	hidden_input.val(settings.parseValue(tokenStorage, settings));
+    }
 
 
     // Pre-populate list if items exist
     function init_list () {
-        li_data = settings.prePopulate;
+        li_data = tokenStorage;
         if(li_data && li_data.length) {
             for(var i in li_data) {
                 var this_token = $("<li><p>"+li_data[i].name+"</p> </li>")
@@ -274,7 +290,8 @@ $.TokenList = function (input, settings) {
                         return false;
                     });
 
-                $.data(this_token.get(0), "tokeninput", {"id": li_data[i].id, "name": li_data[i].name});
+                $.data(this_token.get(0), "tokeninput", li_data[i]);
+                $.data(this_token.get(0), "tokenindex", i);
 
                 // Clear input box and make sure it keeps focus
                 input_box
@@ -285,10 +302,10 @@ $.TokenList = function (input, settings) {
                 hide_dropdown();
 
                 // Save this token id
-                var id_string = li_data[i].id + settings.delimiter;
-                hidden_input.val(hidden_input.val() + id_string);
             }
         }
+        
+        parseStorage();
     }
 
     function is_printable_character(keycode) {
@@ -318,8 +335,8 @@ $.TokenList = function (input, settings) {
     }
 
     // Inner function to a token to the list
-    function insert_token(id, value) {
-      var this_token = $("<li><p>"+ value +"</p> </li>")
+    function insert_token(data) {
+      var this_token = $("<li><p>"+ settings.formatName.call(this, data) +"</p> </li>")
       .addClass(settings.classes.token)
       .insertBefore(input_token);
 
@@ -332,7 +349,11 @@ $.TokenList = function (input, settings) {
               return false;
           });
 
-      $.data(this_token.get(0), "tokeninput", {"id": id, "name": value});
+      
+      $.data(this_token.get(0), "tokeninput", data);
+      
+      tokenStorage.push(data);
+      $.data(this_token.get(0), "tokenindex", data.length);
 
       return this_token;
     }
@@ -340,7 +361,7 @@ $.TokenList = function (input, settings) {
     // Add a token to the token list based on user input
     function add_token (item) {
         var li_data = $.data(item.get(0), "tokeninput");
-        var this_token = insert_token(li_data.id, li_data.name);
+        var this_token = insert_token(li_data);
 
         // Clear input box and make sure it keeps focus
         input_box
@@ -351,8 +372,7 @@ $.TokenList = function (input, settings) {
         hide_dropdown();
 
         // Save this token id
-        var id_string = li_data.id + settings.delimiter;
-        hidden_input.val(hidden_input.val() + id_string);
+        parseStorage();
         
         token_count++;
         
@@ -407,24 +427,20 @@ $.TokenList = function (input, settings) {
     function delete_token (token) {
         // Remove the id from the saved list
         var token_data = $.data(token.get(0), "tokeninput");
+        
+        var token_index = $.data(token.get(0), "tokenindex");
+
 
         // Delete the token
         token.remove();
-        selected_token = null;
+        selected_token = null
+        
+        delete tokenStorage[token_index];
 
         // Show the input box and give it focus again
         input_box.focus();
-
-        // Delete this token's id from hidden input
-        var str = hidden_input.val()
-        var start = str.indexOf(token_data.id+",");
-        var end = str.indexOf(",", start) + 1;
-
-        if(end >= str.length) {
-            hidden_input.val(str.slice(0, start));
-        } else {
-            hidden_input.val(str.slice(0, start) + str.slice(end, str.length));
-        }
+        
+        parseStorage();
         
         token_count--;
         
@@ -489,13 +505,12 @@ $.TokenList = function (input, settings) {
                         select_dropdown_item(this_li);
                     }
 
-                    $.data(this_li.get(0), "tokeninput", {"id": results[i].id, "name": results[i].name});
+                    $.data(this_li.get(0), "tokeninput", results[i]);
                 }
             }
 
             dropdown.show();
             dropdown_ul.slideDown("fast");
-
         } else {
             dropdown
                 .html("<p>"+settings.noResultsText+"</p>")
@@ -559,7 +574,7 @@ $.TokenList = function (input, settings) {
             };
             
             if ($.isFunction(settings.url)) {
-            	settings.url(query, callback);
+            	settings.url.call(this, query, callback);
             } else {
     			var queryStringDelimiter = settings.url.indexOf("?") < 0 ? "?" : "&";
 	            if(settings.method == "POST") {
@@ -602,5 +617,25 @@ $.TokenList.Cache = function (options) {
         return data[query];
     };
 };
+
+$.TokenList.FormatName = function (node) {
+    return node.name;
+};
+
+
+
+$.TokenList.ParseValue = function (value, settings) {
+	var result = [];
+	
+	$.each(value, function(i, node) {
+		if (node) {
+			result.push(node.id);
+		}
+	});
+	
+	return result.join(settings.delimiter); 
+};
+
+
 
 })(jQuery);
