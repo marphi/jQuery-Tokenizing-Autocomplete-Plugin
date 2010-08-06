@@ -61,6 +61,7 @@
             	var name = node.geocoderResult.address_components[0].long_name;
             	var address = node.geocoderResult.formatted_address;
 
+
             	return   name + '<abbr class="formattedAddress">' + address + '</abbr>'; 
            	},
            	parseValue: function(value, settings) {
@@ -73,6 +74,47 @@
         		});
         		return JSON.stringify(result); 
        		}
+        });
+        
+        var europe = new google.maps.LatLng(54.525961, 15.255119);
+
+        var map = new google.maps.Map($('#map')[0], {
+              zoom: 3,
+              mapTypeId: google.maps.MapTypeId.ROADMAP,
+              center: europe
+        });
+
+        var markers = [];
+
+        function fitMap() {
+        	var bounds = new google.maps.LatLngBounds();
+            $.each(markers, function(i, marker) {
+                if (marker) {
+            		bounds.extend(marker.getPosition());
+                }
+            });
+
+            map.fitBounds(bounds);
+        }
+
+        $("#tokenize3").bind('addToken', function(e, token, index) {
+        	markers[index] = new google.maps.Marker({
+                map: map, 
+                position: token.geocoderResult.geometry.location,
+                title: token.name
+            });
+            
+        	fitMap();
+        });
+
+
+        $("#tokenize3").bind('deleteToken', function(e, token, index) {
+            if (markers[index]) {
+				markers[index].setMap();
+				
+				delete markers[index];
+            }
+            fitMap();
         });
 	 });
     </script>
@@ -94,6 +136,8 @@
     <div>
         <h2>Address</h2>
         <input type="text" id="tokenize3" name="blah3" />
+        
+        <div id="map" style="width: 500px; height: 300px;"></div>
     </div>
 </body>
 </html>
