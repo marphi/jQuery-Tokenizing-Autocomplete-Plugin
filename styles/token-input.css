@@ -89,6 +89,7 @@ div.token-input-dropdown ul li {
     background-color: #fff;
     padding: 3px;
     list-style-type: none;
+    cursor: pointer;
 }
 
 div.token-input-dropdown ul li.token-input-dropdown-item {
@@ -107,4 +108,14 @@ div.token-input-dropdown ul li em {
 div.token-input-dropdown ul li.token-input-selected-dropdown-item {
     background-color: #d0efa0;
 }
+
+
+abbr.formattedAddress {
+	color: #666;
+	font-style: italic;
+	font-size: 0.9em;	
+	font-weight: normal;
+	padding-left: 10px;
+}
+
 

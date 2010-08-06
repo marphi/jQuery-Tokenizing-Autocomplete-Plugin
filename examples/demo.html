@@ -46,7 +46,7 @@
                 
 				if (status == google.maps.GeocoderStatus.OK) {
 					$.each(geocoderResults, function(i, val) {
-						results.push({id: val.formatted_address, name: val.formatted_address});					
+						results.push({id: val.formatted_address, name: val.formatted_address, geocoderResult: val});					
 					});
 				}
 				callback(results);
@@ -56,9 +56,25 @@
         $("#tokenize3").tokenInput(geocoderComplete, {
             hintText: "Type your address",
             noResultsText: "No results",
-            searchingText: "Searching..."
+            searchingText: "Searching...",
+           	formatName: function(node) {
+            	var name = node.geocoderResult.address_components[0].long_name;
+            	var address = node.geocoderResult.formatted_address;
+
+            	return   name + '<abbr class="formattedAddress">' + address + '</abbr>'; 
+           	},
+           	parseValue: function(value, settings) {
+        		var result = [];
+        		
+        		$.each(value, function(i, node) {
+        			if (node) {
+        				result.push(node);
+        			}
+        		});
+        		return JSON.stringify(result); 
+       		}
         });
-    });
+	 });
     </script>
 </head>
 
