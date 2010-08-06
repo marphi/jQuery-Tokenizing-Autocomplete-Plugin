@@ -55,7 +55,7 @@
 
         $("#tokenize3").tokenInput(geocoderComplete, {
             hintText: "Type your address",
-            noResultsText: "No results",
+            showNoResultInfo: false,
             searchingText: "Searching...",
            	formatName: function(node) {
             	var name = node.geocoderResult.address_components[0].long_name;

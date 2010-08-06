@@ -28,7 +28,10 @@ $.fn.tokenInput = function (urlOrFunction, options) {
 		delimiterKeyCode: 220,
 		prePopulate: [],
 		formatName: $.TokenList.FormatName,
-		parseValue: $.TokenList.ParseValue
+		parseValue: $.TokenList.ParseValue,
+		showNoResultInfo: true,
+		dropdownShowDuration: 100,
+		dropDownHideDuraiton: null,
     }, options);
 
     settings.classes = $.extend({
@@ -460,20 +463,20 @@ $.TokenList = function (input, settings) {
 
     // Hide and clear the results dropdown
     function hide_dropdown () {
-        dropdown.hide().empty();
+        dropdown.hide(settings.dropdownHideDuration).empty();
         selected_dropdown_item = null;
     }
 
     function show_dropdown_searching () {
         dropdown
             .html("<p>"+settings.searchingText+"</p>")
-            .show();
+            .show(settings.dropdownShowDuration);
     }
 
     function show_dropdown_hint () {
         dropdown
             .html("<p>"+settings.hintText+"</p>")
-            .show();
+            .show(settings.dropdownShowDuration);
     }
 
     // Highlight the query part of the search term
@@ -514,12 +517,16 @@ $.TokenList = function (input, settings) {
                 }
             }
 
-            dropdown.show();
+            dropdown.show(settings.dropdownShowDuration);
             dropdown_ul.slideDown("fast");
         } else {
-            dropdown
-                .html("<p>"+settings.noResultsText+"</p>")
-                .show();
+        	if (settings.showNoResultInfo) {
+	            dropdown
+	                .html("<p>"+settings.noResultsText+"</p>")
+	                .show(settings.dropdownShowDuration);
+        	} else {
+        		dropdown.hide(settings.dropdownHideDuration);
+        	}
         }
     }
 
